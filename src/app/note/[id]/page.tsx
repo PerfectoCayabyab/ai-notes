@@ -1,8 +1,10 @@
-// src/app/note/[id]/page.tsx
 import { getNoteById } from '@/actions/getNoteById';
 
-export default async function NotePage({ params }: { params: { id: string } }) {
-  const note = await getNoteById(params.id);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function NotePage(props: any) {
+  const { id } = props.params as { id: string };
+
+  const note = await getNoteById(id);
 
   if (!note) {
     return <div className="p-4 text-red-600">Note not found.</div>;

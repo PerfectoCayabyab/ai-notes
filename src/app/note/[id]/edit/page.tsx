@@ -1,29 +1,33 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { summarizeNote } from '@/actions/summarizeNote';
 import { updateNote } from '@/actions/updateNote';
+import { useRouter } from 'next/navigation';
 
-export default function EditNote({ params }: { params: { id: string } }) {
+export default function EditNote() {
+  const router = useRouter();
+  const params = useParams();
+  const id = params?.id as string;
+
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const router = useRouter();
 
   useEffect(() => {
     async function fetchNote() {
-      const res = await fetch(`/api/notes/${params.id}`);
+      const res = await fetch(`/api/notes/${id}`);
       const note = await res.json();
       setTitle(note.title);
       setContent(note.content);
     }
-    fetchNote();
-  }, [params.id]);
+    if (id) fetchNote();
+  }, [id]);
 
   async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();
     const summary = await summarizeNote(content);
-    await updateNote(params.id, title, content, summary);
+    await updateNote(id, title, content, summary);
     router.push('/dashboard');
   }
 
