@@ -17,5 +17,5 @@ export async function createNote(
     tags,
     createdAt: new Date(),
   });
-  return note.insertedId;
+  return note.insertedId.toString();
 }

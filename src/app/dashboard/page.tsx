@@ -5,6 +5,7 @@ import { createNote } from "@/actions/createNote";
 import { summarizeNote } from "@/actions/summarizeNote";
 import Link from "next/link";
 import { deleteNote } from "@/actions/deleteNote";
+import toast from 'react-hot-toast';
 
 type Note = {
   _id: string;
@@ -33,30 +34,50 @@ export default function Dashboard() {
   }, []);
 
   async function handleDelete(id: string) {
-    await deleteNote(id);
-    const res = await fetch("/api/notes");
-    const updated = await res.json();
-    setNotes(updated);
+    try {
+      await deleteNote(id);
+      const res = await fetch("/api/notes");
+      const updated = await res.json();
+      setNotes(updated);
+      toast.success('Note deleted');
+    } catch (err) {
+      console.error('Error creating note:', err);
+      toast.error('Failed to delete note');
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const aiSummary = await summarizeNote(content);
-    setSummary(aiSummary);
-    const tagArray = tags
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter(Boolean);
-    await createNote(title, content, aiSummary, tagArray);
-    setTitle("");
-    setContent("");
-    setSummary("");
-    setTags("");
-    const res = await fetch("/api/notes");
-    const updatedNotes = await res.json();
-    setNotes(updatedNotes);
-    setLoading(false);
+  
+    try {
+      const aiSummary = await summarizeNote(content);
+      setSummary(aiSummary);
+  
+      const tagArray = tags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+  
+      await createNote(title, content, aiSummary, tagArray);
+  
+      // Clear inputs
+      setTitle('');
+      setContent('');
+      setSummary('');
+      setTags('');
+  
+      // Refresh notes list
+      const res = await fetch('/api/notes');
+      const updatedNotes = await res.json();
+      setNotes(updatedNotes);
+      toast.success('Note added successfully!');
+    } catch (err) {
+      console.error('Error creating note:', err);
+      toast.error('Failed to create note');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
